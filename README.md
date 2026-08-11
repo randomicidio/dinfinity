@@ -75,24 +75,23 @@ a pedir do jeito normal.
 ## Ícone
 
 O ícone é desenhado pelo próprio programa (`core/icone.py`), então nasce nítido
-em qualquer tamanho e muda de cor conforme o estado — as mesmas cores da
-bolinha na barra lateral:
+em qualquer tamanho e muda de cor conforme **o que o gravador está fazendo**:
 
-| Estado | Cor |
-|--------|-----|
-| Parado | roxo — a cor da marca |
-| Standby | amarelo |
-| Conectando | laranja |
-| Ao vivo | verde |
-| **Gravando** | vermelho, com o ponto cheio |
-| Erro | vermelho claro |
+| Situação | Cor |
+|----------|-----|
+| O gravador não vai gravar nada | roxo — a cor da marca |
+| Armado: a próxima live será gravada | amarelo |
+| **Gravando agora** | vermelho, com o ponto cheio |
+| A conexão com a live falhou | vermelho claro |
+
+A cor segue o gravador, e não o monitor da live. São coisas diferentes: o
+monitor fica em standby o tempo todo esperando a live abrir, e pintar isso de
+amarelo diria "prestes a gravar" mesmo com o REC desarmado.
 
 Parado é o roxo porque é o estado em que o programa abre e passa a maior parte
-do tempo: é ele que dá a cara do Dinfinity na barra de tarefas.
-
-Gravando tem prioridade sobre o estado da live. O ponto mais cheio existe
-porque só a cor não separa "gravando" de "erro" a 16 px, que é o tamanho da
-barra de tarefas.
+do tempo: é ele que dá a cara do Dinfinity na barra de tarefas. O ponto mais
+cheio do vermelho existe porque só a cor não separa "gravando" de "erro" a
+16 px, que é o tamanho da barra de tarefas.
 
 Os `.ico` de cada estado são gerados em `dados/icones/` na primeira vez que
 fazem falta, com a cor no nome do arquivo — mudar a paleta gera arquivos novos

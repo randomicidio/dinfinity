@@ -281,8 +281,12 @@ class App(ctk.CTk):
         self.after(300, self._poll_status)
 
     def _estado_do_icone(self):
-        """Gravar ganha do resto: é o estado em que perder o programa de vista
-        custa mais caro.
+        """Em que pé está a gravação — e não o que o monitor da live faz.
+
+        O monitor vive em standby esperando a live abrir; pintar isso de
+        amarelo diria "prestes a gravar" mesmo com o REC desarmado. Amarelo
+        aqui é só quando o gravador está de fato armado, ou seja, quando a
+        próxima live detectada vai virar arquivo.
 
         Tolera ser chamado cedo: o ícone é posto assim que a janela ganha
         título, antes de o motor e o gravador existirem.
@@ -290,9 +294,13 @@ class App(ctk.CTk):
         try:
             if self.recorder_host.recording:
                 return "gravando"
+            if self.recorder_host.pending:
+                return "aguardando"
         except Exception:  # noqa: BLE001 — o gravador pode nem ter carregado
             pass
-        return getattr(self, "_current_state", "off")
+        if getattr(self, "_current_state", "off") == "error":
+            return "erro"
+        return "parado"
 
     def _aplicar_icone(self):
         estado = self._estado_do_icone()

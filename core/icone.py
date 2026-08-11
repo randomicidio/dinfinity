@@ -3,8 +3,8 @@
 
 É desenhado em vez de vir de um arquivo por dois motivos: nasce nítido em
 qualquer tamanho (a barra de tarefas pede um, a janela pede outro) e a cor sai
-de um parâmetro, o que permite o mesmo ícone contar o que o programa está
-fazendo — parado, em standby, ao vivo ou gravando.
+de um parâmetro, o que permite o mesmo ícone contar em que pé está a gravação
+— parado, armado esperando a live, ou gravando.
 
 A forma é um anel com um ponto no meio, o símbolo universal de gravação. O
 fundo escuro nunca muda: só o anel e o ponto trocam de cor, para a mudança ser
@@ -17,18 +17,19 @@ from PIL import Image, ImageDraw
 
 from core import logger
 
+# O ícone conta o que o **gravador** está fazendo, e não o que o monitor da
+# live está fazendo. São coisas diferentes: o monitor fica em standby o tempo
+# todo esperando a live abrir, e pintar isso de amarelo daria alarme falso de
+# "prestes a gravar" mesmo com o REC desarmado.
+#
 # Parado é o roxo da marca, e não um cinza: é o estado em que o programa passa
 # a maior parte do tempo e o que aparece ao abrir, então é ele que dá a cara do
-# Dinfinity na barra de tarefas. As outras cores são as mesmas da bolinha de
-# estado da barra lateral (gui/app.STATES), para o ícone e a janela nunca
-# contarem histórias diferentes.
+# Dinfinity na barra de tarefas.
 CORES = {
-    "off":        "#c792ea",   # parado — o roxo da marca
-    "standby":    "#f4c542",   # esperando a live abrir
-    "connecting": "#f4a742",   # conectando
-    "connected":  "#4caf50",   # ao vivo
-    "error":      "#ff6b6b",   # deu ruim
-    "gravando":   "#d92b18",   # o vermelho do REC, quando está gravando
+    "parado":     "#c792ea",   # o gravador não vai gravar nada
+    "aguardando": "#f4c542",   # armado: a próxima live será gravada
+    "gravando":   "#d92b18",   # o vermelho do REC, gravando agora
+    "erro":       "#ff6b6b",   # a conexão com a live falhou
 }
 FUNDO = "#141821"
 
@@ -37,6 +38,8 @@ FUNDO = "#141821"
 # verdade. A forma continua a mesma, então não parece outro ícone.
 _PONTO = {"gravando": 0.255}
 _PONTO_PADRAO = 0.30
+
+_ESTADO_PADRAO = "parado"
 
 _cache = {}
 _lock = threading.Lock()
@@ -49,9 +52,9 @@ def _misturar(cor, com, quanto):
     return tuple(int(x + (y - x) * quanto) for x, y in zip(a, b))
 
 
-def desenhar(tamanho=256, estado="off"):
+def desenhar(tamanho=256, estado=_ESTADO_PADRAO):
     """O ícone como imagem RGBA, no tamanho e no estado pedidos."""
-    cor = CORES.get(estado, CORES["off"])
+    cor = CORES.get(estado, CORES[_ESTADO_PADRAO])
     # Desenhado grande e reduzido no fim: é o que dá a borda lisa, já que o
     # Pillow não suavia as formas por conta própria.
     escala = 4
@@ -94,7 +97,7 @@ def para_tk(tamanho, estado):
 _icos = {}
 
 
-def arquivo_ico(estado="off"):
+def arquivo_ico(estado=_ESTADO_PADRAO):
     """Um .ico do estado, gravado em `dados/icones/`. Devolve o caminho.
 
     Existe porque o Windows precisa de um arquivo de verdade: o `iconbitmap`
@@ -111,7 +114,7 @@ def arquivo_ico(estado="off"):
             return _icos[estado]
         pasta = os.path.join(caminhos.dados_dir(), "icones")
         os.makedirs(pasta, exist_ok=True)
-        cor = CORES.get(estado, CORES["off"]).lstrip("#")
+        cor = CORES.get(estado, CORES[_ESTADO_PADRAO]).lstrip("#")
         caminho = os.path.join(pasta, f"dinfinity-{estado}-{cor}.ico")
         if not os.path.isfile(caminho):
             salvar_ico(caminho, estado=estado)
@@ -130,7 +133,7 @@ def _limpar_antigos(pasta, estado, manter):
         pass
 
 
-def aplicar(janela, estado="off"):
+def aplicar(janela, estado=_ESTADO_PADRAO):
     """Põe o ícone na janela e na barra de tarefas, no estado pedido.
 
     O `iconbitmap` não é redundância: o customtkinter põe o ícone dele por
@@ -168,7 +171,7 @@ def registrar_no_windows(app_id="Dinfinity.TikTokLiveSuite"):
         return False
 
 
-def salvar_ico(destino, tamanhos=(16, 24, 32, 48, 64, 128, 256), estado="off"):
+def salvar_ico(destino, tamanhos=(16, 24, 32, 48, 64, 128, 256), estado=_ESTADO_PADRAO):
     """Grava um .ico. O padrão é o estado parado, que é a cara do programa."""
     base = desenhar(max(tamanhos), estado)
     base.save(destino, format="ICO",
