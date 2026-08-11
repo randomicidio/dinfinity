@@ -1,0 +1,11 @@
+customtkinter>=5.2.2
+TikTokLive>=6.6.0
+edge-tts>=7.0.0
+websockets>=12.0
+Pillow>=10.0
+uiautomation>=2.0.26
+# Som e voz. A libmpv em si viaja no programa (rd/mpvlib), então não é preciso
+# instalar o mpv nem o VLC na máquina.
+python-mpv>=1.0.7
+# Impressão do cartão direto na impressora do Windows.
+pywin32>=306

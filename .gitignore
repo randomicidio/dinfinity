@@ -1,0 +1,37 @@
+# --- configuração e dados de quem usa -------------------------------------
+# O config.json é pessoal (usuário da live, impressora, cenas do OBS, saída de
+# áudio) e o programa gera um novo na primeira execução. Para levar o seu de
+# uma máquina a outra, use Configurações -> Backup -> Exportar.
+config.json
+config.json.*
+dados/
+.instancia
+tts_temp/
+
+# --- o que o programa produz ----------------------------------------------
+Gravacoes/
+gifts_cache/
+*.ttgifts
+
+# --- binários de terceiros -------------------------------------------------
+# Passam do limite de 100 MB por arquivo do GitHub e não são nossos: o
+# ferramentas.py baixa os três das fontes oficiais.
+bin/
+rd/mpvlib/
+
+# --- empacotamento ---------------------------------------------------------
+build/
+dist/
+*.manifest
+
+# --- Python ----------------------------------------------------------------
+__pycache__/
+*.py[cod]
+*.egg-info/
+.venv/
+venv/
+
+# --- sistema ---------------------------------------------------------------
+Thumbs.db
+desktop.ini
+.DS_Store
