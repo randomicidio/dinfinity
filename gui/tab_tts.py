@@ -181,10 +181,13 @@ class TTSTab(ctk.CTkFrame):
                 # volta ao padrão em vez de falhar calado na hora de falar.
                 logger.log("warning", "[TTS] A saída de áudio escolhida não existe mais; "
                                       "voltando ao padrão do Windows.")
-            self._device_id = novo
-            self.app.config["tts"]["device"] = novo
+            # O padrão é gravado como vazio, e não como "auto": é o que o
+            # config traz de fábrica, e ter dois jeitos de dizer a mesma coisa
+            # já confundiu uma vez.
+            self._device_id = "" if novo == PADRAO else novo
+            self.app.config["tts"]["device"] = self._device_id
             self.app.config["tts"]["device_nome"] = next(
-                (d["nome"] for d in dispositivos if d["id"] == novo), "")
+                (d["nome"] for d in dispositivos if d["id"] == novo and novo != PADRAO), "")
             save_config(self.app.config)
 
         for d in dispositivos or []:

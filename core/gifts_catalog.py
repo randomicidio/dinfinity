@@ -34,11 +34,17 @@ def _tiktoklive():
                        "TikTokLiveError": TikTokLiveError}
     return _TIKTOKLIVE
 
-from core import logger
+from core import caminhos, logger
 
-APP_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-CATALOG_FILE = os.path.join(APP_DIR, "gifts_catalog.json")
-ICON_DIR = os.path.join(APP_DIR, "gifts_cache")
+# O catálogo atualizado e os ícones baixados vão para `dados/`, junto do resto
+# que o programa produz. Empacotado, escrever ao lado do próprio módulo cairia
+# na pasta temporária do executável — e tudo sumiria ao fechar.
+CATALOG_FILE = os.path.join(caminhos.dados_dir(), "gifts_catalog.json")
+ICON_DIR = os.path.join(caminhos.dados_dir(), "gifts_cache")
+
+# A cópia que viaja com o programa, usada enquanto nenhuma atualização foi
+# baixada: quem instala do zero já abre a aba Reações com a lista pronta.
+CATALOG_EMBUTIDO = os.path.join(caminhos.bundle_dir(), "gifts_catalog.json")
 
 # Um dia. Presente novo do TikTok não aparece de hora em hora, e uma consulta
 # por dia não pesa em nada.
@@ -64,11 +70,17 @@ _lock = threading.Lock()
 
 # ---------------- cache em disco ----------------
 def load_cache():
+    """Lê o catálogo: primeiro o atualizado, senão o que veio com o programa."""
     global _catalog, _atualizado
-    try:
-        with open(CATALOG_FILE, "r", encoding="utf-8") as fh:
-            data = json.load(fh)
-    except (OSError, json.JSONDecodeError):
+    data = None
+    for arquivo in (CATALOG_FILE, CATALOG_EMBUTIDO):
+        try:
+            with open(arquivo, "r", encoding="utf-8") as fh:
+                data = json.load(fh)
+            break
+        except (OSError, json.JSONDecodeError):
+            continue
+    if data is None:
         _catalog, _atualizado = [], 0.0
         return
     if isinstance(data, list):

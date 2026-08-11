@@ -113,7 +113,11 @@ def listar_dispositivos(recarregar=False):
                 logger.log("error", f"[ÁUDIO] Não consegui listar as saídas: {exc}")
             finally:
                 encerrar_player(player)
-        _dispositivos = saida
+        # Só entra em cache o que valeu a pena: guardar uma lista vazia deixaria
+        # o programa achando, pelo resto da sessão, que a máquina não tem saída
+        # de áudio nenhuma.
+        if len(saida) > 1:
+            _dispositivos = saida
         return list(saida)
 
 
@@ -141,6 +145,13 @@ def migrar_dispositivo(ident, nome=""):
     if not ident or ident == PADRAO:
         return PADRAO, bool(ident) and ident != PADRAO
     disponiveis = listar_dispositivos()
+    # Lista vazia não quer dizer "o aparelho sumiu", e sim que não deu para
+    # perguntar (a libmpv não subiu, outro processo estava usando). Descartar a
+    # escolha aqui jogaria fora um ajuste que a pessoa fez à mão — no escuro.
+    if len(disponiveis) <= 1:
+        logger.log("warning", "[ÁUDIO] Não consegui ler as saídas agora; "
+                              "mantendo a que estava escolhida.")
+        return ident, False
     if any(d["id"] == ident for d in disponiveis):
         return ident, False
 
