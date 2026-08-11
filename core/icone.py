@@ -17,13 +17,16 @@ from PIL import Image, ImageDraw
 
 from core import logger
 
-# As cores acompanham as da bolinha de estado da barra lateral (gui/app.STATES),
-# para o ícone e a janela nunca contarem histórias diferentes.
+# Parado é o roxo da marca, e não um cinza: é o estado em que o programa passa
+# a maior parte do tempo e o que aparece ao abrir, então é ele que dá a cara do
+# Dinfinity na barra de tarefas. As outras cores são as mesmas da bolinha de
+# estado da barra lateral (gui/app.STATES), para o ícone e a janela nunca
+# contarem histórias diferentes.
 CORES = {
-    "off":        "#8a8f98",   # parado
+    "off":        "#c792ea",   # parado — o roxo da marca
     "standby":    "#f4c542",   # esperando a live abrir
     "connecting": "#f4a742",   # conectando
-    "connected":  "#c792ea",   # ao vivo — o roxo da marca
+    "connected":  "#4caf50",   # ao vivo
     "error":      "#ff6b6b",   # deu ruim
     "gravando":   "#d92b18",   # o vermelho do REC, quando está gravando
 }
@@ -96,6 +99,10 @@ def arquivo_ico(estado="off"):
 
     Existe porque o Windows precisa de um arquivo de verdade: o `iconbitmap`
     não aceita imagem em memória. Gerado uma vez por estado e reaproveitado.
+
+    A cor entra no nome do arquivo de propósito: mudar a paleta passa a gerar
+    um arquivo novo sozinho, em vez de deixar quem já rodou o programa preso ao
+    desenho antigo — o cache só sabe olhar se o arquivo existe.
     """
     from core import caminhos
 
@@ -104,11 +111,23 @@ def arquivo_ico(estado="off"):
             return _icos[estado]
         pasta = os.path.join(caminhos.dados_dir(), "icones")
         os.makedirs(pasta, exist_ok=True)
-        caminho = os.path.join(pasta, f"dinfinity-{estado}.ico")
+        cor = CORES.get(estado, CORES["off"]).lstrip("#")
+        caminho = os.path.join(pasta, f"dinfinity-{estado}-{cor}.ico")
         if not os.path.isfile(caminho):
             salvar_ico(caminho, estado=estado)
+            _limpar_antigos(pasta, estado, os.path.basename(caminho))
         _icos[estado] = caminho
         return caminho
+
+
+def _limpar_antigos(pasta, estado, manter):
+    """Apaga os .ico deste estado que sobraram de uma paleta anterior."""
+    try:
+        for nome in os.listdir(pasta):
+            if nome.startswith(f"dinfinity-{estado}") and nome != manter:
+                os.remove(os.path.join(pasta, nome))
+    except OSError:
+        pass
 
 
 def aplicar(janela, estado="off"):
@@ -149,8 +168,8 @@ def registrar_no_windows(app_id="Dinfinity.TikTokLiveSuite"):
         return False
 
 
-def salvar_ico(destino, tamanhos=(16, 24, 32, 48, 64, 128, 256), estado="connected"):
-    """Grava o .ico usado ao empacotar o programa com o PyInstaller."""
+def salvar_ico(destino, tamanhos=(16, 24, 32, 48, 64, 128, 256), estado="off"):
+    """Grava um .ico. O padrão é o estado parado, que é a cara do programa."""
     base = desenhar(max(tamanhos), estado)
     base.save(destino, format="ICO",
               sizes=[(t, t) for t in sorted(tamanhos)])

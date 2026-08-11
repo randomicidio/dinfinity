@@ -80,19 +80,24 @@ bolinha na barra lateral:
 
 | Estado | Cor |
 |--------|-----|
-| Parado | cinza |
+| Parado | roxo — a cor da marca |
 | Standby | amarelo |
 | Conectando | laranja |
-| Ao vivo | roxo (a cor da marca) |
+| Ao vivo | verde |
 | **Gravando** | vermelho, com o ponto cheio |
 | Erro | vermelho claro |
+
+Parado é o roxo porque é o estado em que o programa abre e passa a maior parte
+do tempo: é ele que dá a cara do Dinfinity na barra de tarefas.
 
 Gravando tem prioridade sobre o estado da live. O ponto mais cheio existe
 porque só a cor não separa "gravando" de "erro" a 16 px, que é o tamanho da
 barra de tarefas.
 
-O `assets/dinfinity.ico` é gerado por `core.icone.salvar_ico()` e serve para
-empacotar o executável.
+Os `.ico` de cada estado são gerados em `dados/icones/` na primeira vez que
+fazem falta, com a cor no nome do arquivo — mudar a paleta gera arquivos novos
+sozinho. O `assets/dinfinity.ico` é o ícone do executável, gerado por
+`core.icone.salvar_ico()`.
 
 ## Onde ficam as coisas
 
