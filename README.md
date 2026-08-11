@@ -159,3 +159,34 @@ impressão do Windows.
 O monitor usa a biblioteca [TikTokLive](https://github.com/isaackogan/TikTokLive),
 que não é uma API oficial do TikTok. Use por sua conta e risco e respeite as
 regras da plataforma.
+
+## Licença
+
+**AGPL-3.0** (veja o arquivo [LICENSE](LICENSE)).
+
+A escolha não foi livre: o Dinfinity importa a
+[TikTokLive](https://github.com/isaackogan/TikTokLive), que é AGPL-3.0, e uma
+obra que a usa precisa ser distribuída sob a mesma licença. Na prática, quem
+distribuir o programa — modificado ou não — precisa disponibilizar o código
+junto.
+
+### O que vem junto
+
+| Componente | Licença | Como é usado |
+|------------|---------|--------------|
+| [TikTokLive](https://github.com/isaackogan/TikTokLive) | AGPL-3.0 | monitor da live |
+| [edge-tts](https://github.com/rany2/edge-tts) | LGPL-3.0 | geração da voz |
+| [python-mpv](https://github.com/jaseg/python-mpv) | GPL-2.0+ / LGPL-2.1+ | ponte para a libmpv |
+| [libmpv](https://mpv.io/) | GPL-2.0+ | som, voz e prévia do editor |
+| [ffmpeg](https://ffmpeg.org/) (build GPL) | GPL-2.0+ | gravação e exportação |
+| [customtkinter](https://github.com/TomSchimansky/CustomTkinter) | CC0-1.0 | interface |
+| [Pillow](https://python-pillow.org/) | MIT-CMU | cartão de impressão e ícone |
+| [websockets](https://github.com/python-websockets/websockets) | BSD-3-Clause | OBS e Streamer.bot |
+| [uiautomation](https://github.com/yinkaisheng/Python-UIAutomation-for-Windows) | Apache-2.0 | Chat Automático |
+| [pywin32](https://github.com/mhammond/pywin32) | PSF | impressão |
+| [TikTok Sans](rd/assets/fonts/OFL.txt) | SIL OFL 1.1 | fonte do editor |
+
+O ffmpeg e a libmpv não estão no repositório (`ferramentas.py` os baixa), mas
+**entram no executável compilado** — quem distribuir o `.exe` está
+redistribuindo esses binários GPL e precisa oferecer o código-fonte deles
+também, o que os projetos originais já fazem publicamente.
