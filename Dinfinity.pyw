@@ -61,6 +61,12 @@ def main():
         instancia.focar()
         return
 
+    # Identidade própria na barra de tarefas do Windows. Precisa vir antes de
+    # a janela nascer: depois disso ela já foi registrada sob a identidade do
+    # interpretador, e o ícone escolhido não aparece no botão da barra.
+    from core import icone
+    icone.registrar_no_windows()
+
     import customtkinter as ctk  # noqa: F401 (aplicar tema no App)
     from gui.app import App
 

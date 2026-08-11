@@ -63,9 +63,8 @@ class App(ctk.CTk):
         self.geometry("1280x820")
         self.minsize(1024, 680)
 
-        # Identidade própria na barra de tarefas: sem isso o Windows agrupa a
-        # janela sob o ícone do python.exe e o nosso não aparece no botão.
-        icone.registrar_no_windows()
+        # O registro da identidade na barra de tarefas acontece antes disto,
+        # em Dinfinity.main() — depois da janela existir já é tarde.
         self._estado_icone = None
         self._aplicar_icone()
 

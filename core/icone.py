@@ -10,9 +10,12 @@ A forma é um anel com um ponto no meio, o símbolo universal de gravação. O
 fundo escuro nunca muda: só o anel e o ponto trocam de cor, para a mudança ser
 percebida sem o ícone virar outro.
 """
+import os
 import threading
 
 from PIL import Image, ImageDraw
+
+from core import logger
 
 # As cores acompanham as da bolinha de estado da barra lateral (gui/app.STATES),
 # para o ícone e a janela nunca contarem histórias diferentes.
@@ -85,15 +88,51 @@ def para_tk(tamanho, estado):
         return _cache[chave]
 
 
+_icos = {}
+
+
+def arquivo_ico(estado="off"):
+    """Um .ico do estado, gravado em `dados/icones/`. Devolve o caminho.
+
+    Existe porque o Windows precisa de um arquivo de verdade: o `iconbitmap`
+    não aceita imagem em memória. Gerado uma vez por estado e reaproveitado.
+    """
+    from core import caminhos
+
+    with _lock:
+        if estado in _icos and os.path.isfile(_icos[estado]):
+            return _icos[estado]
+        pasta = os.path.join(caminhos.dados_dir(), "icones")
+        os.makedirs(pasta, exist_ok=True)
+        caminho = os.path.join(pasta, f"dinfinity-{estado}.ico")
+        if not os.path.isfile(caminho):
+            salvar_ico(caminho, estado=estado)
+        _icos[estado] = caminho
+        return caminho
+
+
 def aplicar(janela, estado="off"):
-    """Põe o ícone na janela (e na barra de tarefas) no estado pedido."""
+    """Põe o ícone na janela e na barra de tarefas, no estado pedido.
+
+    O `iconbitmap` não é redundância: o customtkinter põe o ícone dele por
+    cima da janela a menos que este método já tenha sido chamado — é ele que
+    decide, olhando um sinalizador próprio. Sem esta chamada, o programa abre
+    com o ícone da biblioteca em vez do nosso.
+    """
+    ok = False
+    try:
+        janela.iconbitmap(arquivo_ico(estado))
+        ok = True
+    except Exception as exc:  # noqa: BLE001
+        logger.log("warning", f"[ÍCONE] Não consegui aplicar o .ico: {exc}")
     try:
         # Dois tamanhos: o Windows pega o maior para a barra de tarefas e o
         # menor para o canto da janela.
         janela.iconphoto(True, para_tk(48, estado), para_tk(16, estado))
-        return True
-    except Exception:  # noqa: BLE001 — sem ícone o programa abre igual
-        return False
+        ok = True
+    except Exception as exc:  # noqa: BLE001 — sem ícone o programa abre igual
+        logger.log("warning", f"[ÍCONE] Não consegui aplicar o ícone: {exc}")
+    return ok
 
 
 def registrar_no_windows(app_id="Dinfinity.TikTokLiveSuite"):
