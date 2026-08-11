@@ -34,16 +34,29 @@ dados = (
     + _se_existir("gifts_catalog.json", ".")
 )
 
+# O gravador e o editor são um motor à parte, em rd/. Entre si eles se importam
+# por nome simples (`import recorder`, `import compositor`), e o programa faz o
+# mesmo pondo rd/ no sys.path — ver core/recorder_host.import_rd. Rodando do
+# código-fonte isso resolve pela pasta; empacotado não existe pasta nenhuma,
+# então os módulos precisam entrar no pacote com esses mesmos nomes de topo.
+# Sem isto a aba Editar abre com "Não foi possível carregar editor de rd/".
+MOTOR_RD = [
+    "compositor", "diario", "editor", "effects_api", "emoji_pack", "gift_log",
+    "pacote", "recorder", "resources", "segredo", "tiktok_api", "tipografia",
+]
+
 # O TikTokLive gera os protos na primeira carga e o edge_tts descobre as vozes
 # em tempo de execução: sem estes, o PyInstaller não enxerga a dependência.
 ocultos = [
     "TikTokLive", "edge_tts", "mpv", "uiautomation", "comtypes",
     "win32print", "win32ui", "win32con", "PIL._tkinter_finder",
-]
+] + MOTOR_RD
 
 a = Analysis(
     ["Dinfinity.pyw"],
-    pathex=[RAIZ],
+    # rd/ no pathex é o que faz o PyInstaller achar os módulos do motor pelo
+    # nome de topo, do mesmo jeito que o programa os procura em tempo de execução.
+    pathex=[RAIZ, os.path.join(RAIZ, "rd")],
     binaries=binarios,
     datas=dados,
     hiddenimports=ocultos,
